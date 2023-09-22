@@ -1,0 +1,42 @@
+spring:
+  profiles:
+    active: dev
+
+
+
+
+
+# 全局配置
+global:
+  scrape_interval:     15s   # 多久 收集 一次数据
+  evaluation_interval: 30s   # 多久评估一次 规则
+  scrape_timeout:      10s   # 每次 收集数据的 超时时间
+
+  # 当Prometheus和外部系统(联邦, 远程存储, Alertmanager)通信的时候，添加标签到任意的时间序列或者报警
+  external_labels:
+    monitor: codelab
+    foo:     bar
+
+# 规则文件, 可以使用通配符
+rule_files:
+  - "first.rules"
+  - "my/*.rules"
+
+
+
+# 收集数据 配置 列表
+scrape_configs:
+  - job_name: 'prometheus'  # 必须配置, 自动附加的job labels, 必须唯一
+
+
+    # 使用job名作为label的 静态配置目录 的 列表
+    static_configs:
+      - targets: [ 'localhost:9090']
+      ### 以下内容为SpringBoot应用配置
+      - job_name: 'SpringBoot-ABlog'
+        scrape interval: 5s
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: [ 10.0.4.7:8080 ]
+
+

@@ -1,0 +1,68 @@
+version: '3'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/anqin_blog?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&allowMultiQueries=true&rewriteBatchedStatements=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=123456
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+  mysql:
+    image: mysql:8
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=anqin_blog
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=123456
+    volumes:
+      - /home/blog/docker/mysql-data/log:/var/log/mysql
+      - /home/blog/docker/mysql-data/data:/var/lib/mysql
+      - /home/blog/docker/mysql-data/conf:/etc/mysql/conf.d
+  redis:
+    image: redis:latest
+    #ports:
+    # - 6380:6379
+    volumes:
+      - ./redis-data:/data
+
+  # grafana(监控) 可选 【start】=========================  教程：https://blog.anqin.cc/archives/1695225114418
+  grafana:
+    image: grafana/grafana:master                                # 原镜像`grafana/grafana:master`
+    container_name: grafana                                      # 容器名为'grafana'
+    restart: unless-stopped                                      # 指定容器退出后的重启策略为始终重启，但是不考虑在Docker守护进程启动时就已经停止了的容器
+    environment:
+      - GF_LANG=zh-CN
+    volumes: # 数据卷挂载路径设置,将本机目录映射到容器目录
+      - "/home/grafana/data:/var/lib/grafana"
+      - "/home/grafana/config/defaults.ini:/usr/share/grafana/conf/defaults.ini"
+      - "/home/grafana/log:/var/log/grafana"
+    ports: # 映射端口
+      - "3001:3000"
+
+  prometheus:
+    image: prom/prometheus:latest
+    restart: always
+    container_name: prometheus
+    hostname: prometheus
+    environment:
+      - TZ=Asia/Shanghai
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--storage.tsdb.retention.time=7d'
+      - '--web.external-url=prometheus'
+    volumes:
+      - /home/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - /home/prometheus/data:/prometheus
+    depends_on:
+      - grafana
+# grafana(监控) 可选 【end】=========================

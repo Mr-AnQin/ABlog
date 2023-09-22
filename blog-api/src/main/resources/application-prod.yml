@@ -1,0 +1,137 @@
+
+server:
+  port: 8080
+blog:
+  # 后端地址
+  api: https://view.anqin.cc
+  # 后台后端地址
+  cms: https://admin.anqin.cc
+  name: AnQin Blog
+  # 前台前端地址
+  view: https://anqin.cc
+comment:
+  default-open: true
+  notify:
+    channel: mail
+http:
+  proxy:
+    server:
+      host: anqin.cc
+      port: 7890
+      timeout: 10000
+logging:
+  file: blog-api/log/blog-dev
+  level:
+    root: info
+    top:
+      aqlog: debug
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+  mapper-locations: classpath:mapper/*.xml
+spring:
+  application:
+    name: SpringBoot-ABlog
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://xxxxx:3306/anqin_blog?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&allowMultiQueries=true&rewriteBatchedStatements=true
+    username: anqin_blog
+    password: xxxxxxx
+
+    # 数据库迁移配置
+  flyway:
+    #开启 flyway
+    enabled: true
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    # flyway.baseline-on-migrate设置为true表示在执行迁移时，如果数据库中没有记录迁移历史，则会自动执行基线迁移。
+    baseline-on-migrate: true
+    # 创建迁移脚本：在src/main/resources/db/migration目录下，创建SQL脚本文件，按照Flyway的命名规则命名。
+    # 例如，可以创建一个名为 V1__create_table.sql的文件，其中包含创建表的SQL语句。
+    # 启动应用程序：当您启动Spring Boot应用程序时，Flyway会自动检测并执行未应用的迁移脚本。它会根据脚本文件的版本号顺序依次执行。
+    # Flyway会自动创建一个名为flyway_schema_history的表，用于记录已应用的迁移历史.
+    locations: classpath:db/migration
+
+  mail:
+    default-encoding: UTF-8
+    host: smtp.qq.com
+    password: xxxxx
+    port: 25
+    properties:
+      mail:
+        debug: true
+        smtp:
+          socketFactory:
+            class: javax.net.ssl.SSLSocketFactory
+    username: 1306895785@qq.com
+  redis:
+    database: 1
+    host: 10.0.4.7
+    port: 6379
+    timeout: 10000ms
+    password:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 100MB
+tg:
+  bot:
+    api: xxxx
+    chat-id: 1234567890
+    reverse-proxy-url: xxxx
+    token: xxxx:xxx
+    use-proxy: false
+    use-reverse-proxy: true
+token:
+  expireTime: 259200000
+  secretKey: xxxxx
+upload:
+  channel: aliyun
+  file:
+    access-path: /image/**
+    path: /Users/aqlog/Desktop/upload/
+    resources-locations: file:${upload.file.path}
+  github:
+    repos: xxx
+    repos-path: /xxxx
+    token: xxxxxx
+    username: xxxx
+  upyun:
+    bucket-name: xxx
+    domain: xxxx
+    password: xxx
+    path: xxxxx
+    username: xx
+
+# 用来储存用户评论qq头像
+aliyun:
+  oss:
+    file:
+      bucketname: xxx
+      endpoint: xxxxx
+      keyid: xxx
+      keysecret: xxx
+      path: xxxxxx
+
+
+# 基于 grafana prometheus（普罗米修斯） 监控
+
+# 1、将所有Spring Web 监控点暴露， 就可以对外提供各种的指标数据了
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  # end
+  # 2、将 SpringWeb 暴露的数据转为 prometheus 格式
+  endpoint:
+    prometheus:
+      enabled: true
+    health:
+      show-details: always # 查看更多的细节
+  # 3、将指标设置为 允许导出
+  metrics:
+    export:
+      prometheus:
+        enabled: true
